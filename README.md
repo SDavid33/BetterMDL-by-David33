@@ -74,8 +74,7 @@ BetterMDL-By-David33.user.js
 
 ## Links
 
-- [Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-24-by-david33/code)
-- [GitHub](https://github.com/SDavid33/BetterMDL-by-David33)
+[Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-24-by-david33/code)
 
 ## Sponsor
 
