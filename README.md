@@ -91,6 +91,8 @@ v1.2.24
 ## Links
 
 [Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-24-by-david33/code)
+[MyDramaList Forum](https://mydramalist.com/discussions/general-discussion/88611-gathering-feedbacks?pid=3514580&page=15#p3514580)
+
 
 ## Sponsor
 
