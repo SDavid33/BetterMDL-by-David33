@@ -3,6 +3,7 @@
 // @namespace    https://mydramalist.com/
 // @version      1.2.24
 // @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
+// @license      MIT
 // @match        https://mydramalist.com/
 // @grant        GM_xmlhttpRequest
 // @grant        GM.xmlHttpRequest
