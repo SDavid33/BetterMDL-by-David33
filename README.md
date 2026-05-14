@@ -58,8 +58,18 @@ A lightweight MyDramaList userscript by **David33** that adds useful UI improvem
 2. Open the script file:
 
 ```text
-BetterMDL v1.2.24 by David33.js
+BetterMDL-By-David33.user.js
 ```
+
+## Screenshots
+
+## Screenshots
+
+![BetterMDL screenshot 1](screenshots/screenshot-1.png)
+![BetterMDL screenshot 2](screenshots/screenshot-2.png)
+![BetterMDL screenshot 3](screenshots/screenshot-3.png)
+![BetterMDL screenshot 4](screenshots/screenshot-4.png)
+
 
 ## Greasy Fork
 
