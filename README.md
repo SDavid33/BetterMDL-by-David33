@@ -61,6 +61,9 @@ A lightweight MyDramaList userscript by **David33** that adds useful UI improvem
 BetterMDL-By-David33.user.js
 ```
 
+> Note: For full "Titles by Country" statistics to work, open your Completed, Currently Watching, On Hold, and Dropped lists, slowly scroll through each page until everything loads, then return to your profile and click Refresh. This allows BetterMDL to collect the full data and show accurate country stats.
+
+
 ## Screenshots
 
 ![BetterMDL screenshot](Screenshots/screenshot-1.png)
