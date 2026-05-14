@@ -63,12 +63,10 @@ BetterMDL-By-David33.user.js
 
 ## Screenshots
 
-## Screenshots
-
-![BetterMDL screenshot 1](screenshots/screenshot-1.png)
-![BetterMDL screenshot 2](screenshots/screenshot-2.png)
-![BetterMDL screenshot 3](screenshots/screenshot-3.png)
-![BetterMDL screenshot 4](screenshots/screenshot-4.png)
+![BetterMDL screenshot](Screenshots/screenshot-1.png)
+![BetterMDL screenshot](Screenshots/screenshot-2.png)
+![BetterMDL screenshot](Screenshots/screenshot-3.png)
+![BetterMDL screenshot](Screenshots/screenshot-4.png)
 
 
 ## Greasy Fork
