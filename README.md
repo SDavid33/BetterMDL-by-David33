@@ -72,9 +72,10 @@ BetterMDL-By-David33.user.js
 ![BetterMDL screenshot](Screenshots/screenshot-4.png)
 
 
-## Greasy Fork
+## Links
 
-[Greasy Fork script page](https://greasyfork.org/en/scripts/575816-youtube-search-sorter)
+- [Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-24-by-david33/code)
+- [GitHub](https://github.com/SDavid33/BetterMDL-by-David33)
 
 ## Sponsor
 
