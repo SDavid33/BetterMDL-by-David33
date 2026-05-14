@@ -2,8 +2,8 @@
 // @name         BetterMDL v1.2.24 by David33
 // @namespace    https://mydramalist.com/
 // @version      1.2.24
-// @description  BetterMDL people page fixes + original work box on title pages
-// @match        https://mydramalist.com/*
+// @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
+// @match        https://mydramalist.com/
 // @grant        GM_xmlhttpRequest
 // @grant        GM.xmlHttpRequest
 // @connect      api.jikan.moe
