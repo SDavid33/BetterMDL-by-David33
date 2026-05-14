@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BetterMDL v1.2.24 by David33
+// @name         BetterMDL v1.2.25 by David33
 // @namespace    https://mydramalist.com/
-// @version      1.2.24
+// @version      1.2.25
 // @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
 // @license      MIT
 // @match        https://mydramalist.com/*
@@ -73,6 +73,7 @@
     peopleAutoHideSections: 'People page: Hide Bio, Photos, Articles, Comments',
     titleAutoHideSections: 'Title page: Hide Photos, Reviews, Recent Discussions, Comments',
     titleSynopsisHide: 'Title page: Hide Synopsis',
+    titleNativeTitleFirst: 'Title: Native title first',
     titleOriginalWork: 'Title: Original Work box',
     titlePortalIcons: 'Title: Portal icons under poster',
     titleRatedByFriends: 'Title: Rated by Friends box',
@@ -125,6 +126,7 @@
   let dramalistCollectorHref = '';
   let dramalistCollectorScrollBound = false;
   let dramalistCollectorScrollTimer = null;
+  let dramalistUndecidedScheduleKey = '';
   let bootInFlight = false;
   let bootQueued = false;
   let settingsPanelRendered = false;
@@ -145,6 +147,20 @@
   const setLocalCache = (key, value) => localStorage.setItem(key, JSON.stringify(value));
   const getFilmographyUiState = () => safeJsonParse(localStorage.getItem(STORAGE_FILMOGRAPHY_UI), {});
   const setFilmographyUiState = (value) => localStorage.setItem(STORAGE_FILMOGRAPHY_UI, JSON.stringify(value));
+  const isDebugEnabled = () => localStorage.getItem(`${NS}:debug`) === '1';
+  const setDebugCache = (key, value) => {
+    if (!isDebugEnabled()) return;
+    try {
+      localStorage.setItem(`${NS}:debug:${key}`, JSON.stringify(value));
+    } catch {}
+  };
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
 
   function getDefaultSettings() {
     return {
@@ -152,6 +168,9 @@
         config.key,
         { icon: config.icon, color: config.color },
       ])),
+      labels: {
+        undecidedStatus: 'Undecided',
+      },
       features: {
         peopleStatusSummary: true,
         peopleFilmographyIcons: true,
@@ -167,6 +186,7 @@
         nativeSnsIcons: true,
         titleTrailerButton: true,
         titleAmazonButton: true,
+        titleNativeTitleFirst: false,
         titleSynopsisHide: false,
         titleAutoHideSections: false,
       },
@@ -178,8 +198,11 @@
     const incoming = settings && typeof settings === 'object' ? settings : {};
     const merged = {
       statuses: {},
+      labels: { ...defaults.labels, ...(incoming.labels || {}) },
       features: { ...defaults.features, ...(incoming.features || {}) },
     };
+
+    merged.labels.undecidedStatus = collapseWhitespace(merged.labels.undecidedStatus).slice(0, 40) || defaults.labels.undecidedStatus;
 
     Object.entries(defaults.statuses).forEach(([key, value]) => {
       const next = incoming.statuses?.[key] || {};
@@ -255,6 +278,7 @@
       STORAGE_PROFILE_COUNTRY_STATS,
     ].forEach(compactCacheStore);
 
+    localStorage.removeItem(`${NS}:debug:country:last`);
     localStorage.removeItem(`${NS}:country-debug:last`);
     localStorage.setItem(STORAGE_CACHE_MAINT, today);
   }
@@ -898,6 +922,23 @@
       .${NS}-filmography-hidden {
         display: none !important;
       }
+      .${NS}-undecided-icon {
+        display: inline-block;
+        width: 1.08em;
+        height: 1.08em;
+        box-sizing: border-box;
+        vertical-align: -.16em;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .${NS}-undecided-icon.is-v2 {
+        width: 1.12em;
+        height: 1.12em;
+        stroke-width: 2;
+      }
 
       #${ORIGINAL_WORK_BOX_ID} .box-body {
         padding: 10px 14px 14px;
@@ -1425,6 +1466,14 @@
       .${NS}-settings-col {
         min-width: 0;
       }
+      .${NS}-settings-right {
+        grid-column: 2 / 4;
+        display: grid;
+        grid-template-columns: 320px 220px;
+        gap: 18px;
+        align-items: start;
+        min-width: 0;
+      }
       .${NS}-settings-storage {
         width: 360px;
         max-width: 100%;
@@ -1481,6 +1530,12 @@
       .${NS}-settings-colors .form-control {
         max-width: 188px;
       }
+      .${NS}-settings-wide {
+        grid-column: 1 / 3;
+      }
+      .${NS}-settings-wide .form-control {
+        max-width: none;
+      }
       .${NS}-settings-form .alert {
         margin-bottom: 18px;
       }
@@ -1495,6 +1550,12 @@
         }
         .${NS}-settings-col {
           margin-bottom: 16px;
+        }
+        .${NS}-settings-right {
+          display: block;
+        }
+        .${NS}-settings-wide {
+          grid-column: auto;
         }
         .${NS}-settings-storage {
           margin-top: 20px;
@@ -2263,6 +2324,80 @@
     }, { passive: true });
   }
 
+  function getUndecidedStatusLabel() {
+    return collapseWhitespace(getSettings().labels?.undecidedStatus || '') || 'Undecided';
+  }
+
+  function shouldSkipTextReplacementNode(node) {
+    const parent = node?.parentElement;
+    if (!parent) return true;
+    return !!parent.closest('script, style, textarea, input, select, option');
+  }
+
+  function replaceUndecidedTextNodes(root, label) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (shouldSkipTextReplacementNode(node)) return NodeFilter.FILTER_REJECT;
+        return /Undecided/i.test(node.nodeValue || '') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      node.nodeValue = String(node.nodeValue || '').replace(/\bUndecided\b/g, () => label);
+    });
+  }
+
+  function setUndecidedIcon(iconRoot, isV2 = false) {
+    if (!iconRoot || iconRoot.dataset.betterMdlUndecidedIcon === '1') return;
+    iconRoot.dataset.betterMdlUndecidedIcon = '1';
+    iconRoot.innerHTML = `
+      <svg class="${NS}-undecided-icon${isV2 ? ' is-v2' : ''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 3h7l5 5v9.5A3.5 3.5 0 0 1 15.5 21h-9A3.5 3.5 0 0 1 3 17.5v-11A3.5 3.5 0 0 1 6.5 3H7z"></path>
+        <path d="M14 3v4.2A1.8 1.8 0 0 0 15.8 9H20"></path>
+        <path d="M7.5 12h5"></path>
+        <path d="M7.5 15.5H11"></path>
+        <path d="M16.5 13.5v5"></path>
+        <path d="M14 16h5"></path>
+      </svg>
+    `;
+  }
+
+  function initDramalistUndecidedLabel() {
+    if (!isDramalistPage()) return;
+    const label = getUndecidedStatusLabel();
+    const root = q('#mydramalist_v2') || q('#content') || q('#container') || q('main') || document.body;
+    if (!root) return;
+
+    qa('a[href*="/undecided"]', root).forEach((link) => {
+      const textNode = q('.text, .nav-link-title, span:not(.icon)', link);
+      if (textNode) textNode.textContent = label;
+      replaceUndecidedTextNodes(link, label);
+      const iconRoot = q('.icon', link);
+      if (iconRoot) setUndecidedIcon(iconRoot, !!link.closest('#mydramalist_v2'));
+    });
+
+    qa('.filter-item, .status, .dropdown-item, .nav-link', root).forEach((node) => {
+      if (/\bUndecided\b/i.test(text(node))) replaceUndecidedTextNodes(node, label);
+    });
+
+    qa('.el-select-dropdown__item span', document.body).forEach((node) => {
+      if (/\bUndecided\b/i.test(text(node))) replaceUndecidedTextNodes(node, label);
+    });
+  }
+
+  function scheduleDramalistUndecidedLabel() {
+    if (!isDramalistPage()) return;
+    const scheduleKey = `${location.href}|${getUndecidedStatusLabel()}`;
+    if (dramalistUndecidedScheduleKey === scheduleKey) {
+      initDramalistUndecidedLabel();
+      return;
+    }
+    dramalistUndecidedScheduleKey = scheduleKey;
+    [0, 250, 800, 1800, 3500].forEach((ms) => setTimeout(initDramalistUndecidedLabel, ms));
+  }
+
   function extractCountryEntriesFromDramalistDoc(doc) {
     const entries = [];
     const roots = qa('table, .list-item, .dramalist-item, .mdl-style-list, .mdl-style-list-item, [class*="list-item"]', doc);
@@ -2355,9 +2490,7 @@
       debug.counted += 1;
     });
     debug.entries = entries.length;
-    try {
-      localStorage.setItem(`${NS}:country-debug:last`, JSON.stringify(debug));
-    } catch {}
+    setDebugCache('country:last', debug);
     return entries;
   }
 
@@ -2470,9 +2603,7 @@
 
     if (!token || !isOwnProfile) {
       debug.skippedReason = !token ? 'missing token' : 'not current profile';
-      try {
-        localStorage.setItem(`${NS}:country-debug:api`, JSON.stringify(debug));
-      } catch {}
+      setDebugCache('country:api', debug);
       return null;
     }
 
@@ -2499,9 +2630,7 @@
     }
 
     debug.totalRawEntries = entries.length;
-    try {
-      localStorage.setItem(`${NS}:country-debug:api`, JSON.stringify(debug));
-    } catch {}
+    setDebugCache('country:api', debug);
 
     return entries.length ? entries : null;
   }
@@ -2604,14 +2733,12 @@
       debug.statuses.push(result.debug);
     }
     debug.totalRawEntries = entries.length;
-    try {
-      localStorage.setItem(`${NS}:country-debug:iframe`, JSON.stringify(debug));
-    } catch {}
+    setDebugCache('country:iframe', debug);
     return entries.length ? { entries, debug } : null;
   }
 
   function summarizeMdlApiDebug() {
-    const debug = safeJsonParse(localStorage.getItem(`${NS}:country-debug:api`), null);
+    const debug = safeJsonParse(localStorage.getItem(`${NS}:debug:country:api`), null);
     if (!debug) return '';
     if (debug.skippedReason) return debug.skippedReason;
     const firstPage = (debug.types || []).flatMap((item) => item.pages || [])[0];
@@ -3027,9 +3154,7 @@
 
     scrapeDebug.totalRawEntries = allEntries.length;
     scrapeDebug.rawUniqueEntries = countUniqueCountryEntryKeys(allEntries);
-    try {
-      localStorage.setItem(`${NS}:country-debug:scrape`, JSON.stringify(scrapeDebug));
-    } catch {}
+    setDebugCache('country:scrape', scrapeDebug);
 
     const combinedEntries = cachedListEntries.length
       ? dedupeCountryEntries([...cachedListEntries, ...allEntries])
@@ -3041,9 +3166,7 @@
     scrapeDebug.missingCountry = enrichedEntries.filter((entry) => !isKnownCountryName(entry.country)).length;
     scrapeDebug.knownCountryEntries = builtStats.knownCountryEntries;
     scrapeDebug.duplicateEntries = builtStats.duplicateEntries;
-    try {
-      localStorage.setItem(`${NS}:country-debug:scrape`, JSON.stringify(scrapeDebug));
-    } catch {}
+    setDebugCache('country:scrape', scrapeDebug);
 
     const result = {
       ...builtStats,
@@ -4639,13 +4762,58 @@
     return q('h1.film-title, h1');
   }
 
+  function getTitleHeadingOriginalText() {
+    const heading = getTitleHeading();
+    return collapseWhitespace(heading?.dataset?.bettermdlOriginalTitle || text(heading));
+  }
+
+  function getTitleHeaderNativeTitle() {
+    const subtitle = q('.title-container .film-subtitle span, .title-container .film-subtitle');
+    const raw = collapseWhitespace(text(subtitle));
+    const nativeTitle = collapseWhitespace(raw.split(/\s*[‧·]\s*/)[0] || '');
+    if (nativeTitle && !/\b(?:drama|movie|special|tv show|variety show)\b/i.test(nativeTitle) && !/^\d{4}$/.test(nativeTitle)) {
+      return nativeTitle;
+    }
+    return '';
+  }
+
+  function initTitleNativeTitleSwap() {
+    if (!isTitlePage()) return;
+    const heading = q('.title-container h1.film-title') || getTitleHeading();
+    const subtitle = q('.title-container .film-subtitle span, .title-container .film-subtitle');
+    if (!heading || !subtitle) return;
+
+    if (!heading.dataset.bettermdlOriginalTitle) {
+      heading.dataset.bettermdlOriginalTitle = collapseWhitespace(text(heading));
+    }
+    if (!subtitle.dataset.bettermdlOriginalSubtitle) {
+      subtitle.dataset.bettermdlOriginalSubtitle = collapseWhitespace(text(subtitle));
+    }
+
+    const originalTitle = collapseWhitespace(heading.dataset.bettermdlOriginalTitle);
+    const originalSubtitle = collapseWhitespace(subtitle.dataset.bettermdlOriginalSubtitle);
+    const nativeTitle = extractTitlePageNativeTitle() || getTitleHeaderNativeTitle();
+    const enabled = isFeatureEnabled('titleNativeTitleFirst') && nativeTitle && nativeTitle !== originalTitle;
+
+    if (!enabled) {
+      heading.textContent = originalTitle;
+      subtitle.textContent = originalSubtitle;
+      return;
+    }
+
+    const subtitleParts = originalSubtitle.split(/\s*[‧·]\s*/).map(collapseWhitespace).filter(Boolean);
+    const detailParts = subtitleParts.slice(1);
+    heading.textContent = nativeTitle;
+    subtitle.textContent = [originalTitle, ...detailParts].filter(Boolean).join(' ‧ ');
+  }
+
   function getTitleIdFromPath() {
     const match = location.pathname.match(/^\/(\d+)(?:-|\/|$)/);
     return match ? match[1] : '';
   }
 
   function getTitleYearFromHeading() {
-    const headingText = text(getTitleHeading());
+    const headingText = getTitleHeadingOriginalText();
     const match = headingText.match(/\((\d{4})\)\s*$/);
     return match ? match[1] : '';
   }
@@ -4783,7 +4951,7 @@
   }
 
   function getTitlePageContext() {
-    const heading = collapseWhitespace(text(getTitleHeading()).replace(/\(\d{4}\)\s*$/, ''));
+    const heading = collapseWhitespace(getTitleHeadingOriginalText().replace(/\(\d{4}\)\s*$/, ''));
     const pageNativeTitle = extractTitlePageNativeTitle();
     const aliases = extractTitlePageAliasTitles();
     const meta = qa('.show-detailsxss, .list-item, .box-body li, .show-details li')
@@ -5047,7 +5215,7 @@
 
   function getPortalContext() {
     const headingLink = q('h1.film-title a');
-    const title = collapseWhitespace(text(headingLink || getTitleHeading()).replace(/\(\d{4}\)\s*$/, ''));
+    const title = collapseWhitespace((headingLink ? text(headingLink) : getTitleHeadingOriginalText()).replace(/\(\d{4}\)\s*$/, ''));
     const nativeTitle = collapseWhitespace(text(q('b.inline + a')));
     const year = getTitleYearFromHeading();
     const kind = getTitleKind();
@@ -7830,6 +7998,13 @@
       </div>
     `).join('');
 
+    const labelRows = `
+      <div class="form-group ${NS}-settings-label-field ${NS}-settings-wide">
+        <label class="control-label" for="${NS}-label-undecided-status">Watchlist: Undecided label</label>
+        <input type="text" class="form-control" id="${NS}-label-undecided-status" name="label_undecidedStatus" maxlength="40" value="${escapeHtml(settings.labels?.undecidedStatus || 'Undecided')}">
+      </div>
+    `;
+
     const storageText = formatStorageUsage(getBetterMdlStorageUsageBytes());
 
     const iconRows = Object.values(STATUS_CONFIG).map((config) => {
@@ -7873,11 +8048,14 @@
               </div>
             </div>
           </div>
-          <div class="${NS}-settings-col ${NS}-settings-icons">
-            ${iconRows}
-          </div>
-          <div class="${NS}-settings-col ${NS}-settings-colors">
-            ${colorRows}
+          <div class="${NS}-settings-right">
+            <div class="${NS}-settings-col ${NS}-settings-icons">
+              ${iconRows}
+            </div>
+            <div class="${NS}-settings-col ${NS}-settings-colors">
+              ${colorRows}
+            </div>
+            ${labelRows}
           </div>
         </div>
       </form>
@@ -7896,6 +8074,11 @@
         color: sanitizeHexColor(colorInput?.value, defaults.statuses[config.key].color),
       };
     });
+
+    next.labels = {
+      ...(next.labels || {}),
+      undecidedStatus: collapseWhitespace(q('[name="label_undecidedStatus"]', panel)?.value || '').slice(0, 40) || defaults.labels.undecidedStatus,
+    };
 
     Object.keys(FEATURE_LABELS).forEach((featureKey) => {
       next.features[featureKey] = !!q(`[name="feature_${featureKey}"]`, panel)?.checked;
@@ -8021,6 +8204,7 @@
     if (location.href !== lastObservedHref) {
       lastObservedHref = location.href;
       titlePageBootedHref = '';
+      dramalistUndecidedScheduleKey = '';
       settingsPanelRendered = false;
       return true;
     }
@@ -8058,6 +8242,7 @@
     }
 
     initDramalistCountryCacheCollector();
+    scheduleDramalistUndecidedLabel();
 
     if (!observer && document.body) {
       observer = new MutationObserver((mutations) => {
@@ -8098,6 +8283,7 @@
         initTitlePageSectionToggles();
         initTitleNativeActionToggles();
         await initPortalLinks().catch(() => {});
+        initTitleNativeTitleSwap();
         return;
       }
       titlePageBootedHref = location.href;
@@ -8109,6 +8295,7 @@
       await initFriendsRatings().catch(() => {});
       await initWatchedFriends().catch(() => {});
       initTitleNativeActionToggles();
+      initTitleNativeTitleSwap();
       return;
     }
 

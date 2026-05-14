@@ -19,6 +19,7 @@ A lightweight MyDramaList userscript by **David33** that adds useful UI improvem
 - Portal Icons under Poster
 - Rated by Friends Box
 - Watched by Friends Box
+- Optional Native Title First title header
 - Hide/Show "Watch Trailer Button"
 - Hide/Show "Buy on Amazon Button"
 - Hide Photos, Reviews, Recent Discussions, Comments
@@ -44,6 +45,7 @@ A lightweight MyDramaList userscript by **David33** that adds useful UI improvem
 - Enable / Disable BetterMDL features
 - Customize status icons
 - Customize status colors
+- Customize the Watchlist Undecided label
 - Hide/Show Support for every feature
 - Reset settings
 - Clear BetterMDL cache
@@ -65,6 +67,12 @@ BetterMDL-By-David33.user.js
 
 
 ### UPDATES:
+
+v1.2.25
+
+- Added optional Title: Native title first setting.
+- Added custom Watchlist Undecided label setting for V1/V2 Drama List views.
+- Replaced the V2 Undecided question mark with a note-style BetterMDL icon.
 
 v1.2.24
 
@@ -90,8 +98,7 @@ v1.2.24
 
 ## Links
 
-[Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-24-by-david33/code)
-
+[Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-25-by-david33/code)
 [MyDramaList Forum](https://mydramalist.com/discussions/general-discussion/88611-gathering-feedbacks?pid=3514580&page=15#p3514580)
 
 
