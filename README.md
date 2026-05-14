@@ -64,6 +64,22 @@ BetterMDL-By-David33.user.js
 > Note: For full "Titles by Country" statistics to work, open your Completed, Currently Watching, On Hold, and Dropped lists, slowly scroll through each page until everything loads, then return to your profile and click Refresh. This allows BetterMDL to collect the full data and show accurate country stats.
 
 
+### UPDATES:
+
+v1.2.24
+
+- Added Comments Hide/Show support for both People and Title pages.
+- The Comments section can now be collapsed with the same Hide section/Show section behavior as other BetterMDL sections.
+- Added a new People Filmography toolbar.
+- Sort filmography by Title, Year, Episodes, or Rating.
+- Toggle ascending/descending order.
+- Hide completed/watched titles.
+- Switch between normal table view and a larger poster/card view.
+- Added new options to BetterMDL Settings: Hide/Show Comments for People/Title pages and Filmography toolbar. You can disable the toolbar or the Large View view.
+- Title page auto-hide now includes Comments.
+- People filmography controls can be enabled/disabled with Filmography: Sort by/Large View.
+
+
 ## Screenshots
 
 ![BetterMDL screenshot](Screenshots/screenshot-1.png)
