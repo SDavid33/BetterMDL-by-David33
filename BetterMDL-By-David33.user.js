@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BetterMDL v1.2.25 by David33
+// @name         BetterMDL v1.2.26 by David33
 // @namespace    https://mydramalist.com/
-// @version      1.2.25
+// @version      1.2.26
 // @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
 // @license      MIT
 // @match        https://mydramalist.com/*
@@ -833,13 +833,17 @@
         max-width: calc(100% - 12px);
         padding: 2px 6px;
         border-radius: 3px;
-        background: color-mix(in srgb, Canvas 82%, currentColor 18%);
-        color: CanvasText;
+        background: rgba(0,0,0,.42);
+        color: #fff;
         font-size: 12px;
         font-weight: 700;
         line-height: 1.2;
         box-shadow: 0 1px 5px rgba(0,0,0,.35);
+        text-shadow: 0 1px 2px rgba(0,0,0,.8);
         white-space: nowrap;
+      }
+      .${NS}-filmography-card-badge.is-status {
+        box-shadow: 0 1px 5px rgba(0,0,0,.35);
       }
       .${NS}-filmography-card-badge.is-left {
         left: 6px;
@@ -3352,6 +3356,10 @@
     return status?.color || 'color-mix(in srgb, currentColor 30%, transparent)';
   }
 
+  function getFilmographyStatusBadgeBackground(status) {
+    return status?.color ? `color-mix(in srgb, ${status.color} 68%, transparent)` : '';
+  }
+
   function getFilmographySectionStateKey(sectionKey) {
     if (sectionKey === getPeopleFilmographyGlobalSectionKey()) return sectionKey;
     return `${location.pathname}:${sectionKey}`;
@@ -3607,13 +3615,20 @@
     if (item.year) {
       const yearBadge = document.createElement('span');
       yearBadge.className = `${NS}-filmography-card-badge is-left`;
-      yearBadge.style.background = getFilmographyStatusColor(item.status);
+      if (item.status) {
+        yearBadge.classList.add('is-status');
+        yearBadge.style.background = getFilmographyStatusBadgeBackground(item.status);
+      }
       yearBadge.textContent = String(item.year);
       cover.appendChild(yearBadge);
     }
     if (item.episodes != null) {
       const episodeBadge = document.createElement('span');
       episodeBadge.className = `${NS}-filmography-card-badge is-right`;
+      if (item.status) {
+        episodeBadge.classList.add('is-status');
+        episodeBadge.style.background = getFilmographyStatusBadgeBackground(item.status);
+      }
       episodeBadge.textContent = String(item.episodes);
       cover.appendChild(episodeBadge);
     }

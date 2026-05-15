@@ -68,6 +68,12 @@ BetterMDL-By-David33.user.js
 
 ### UPDATES:
 
+
+v1.2.26
+
+- Fixed large filmography year/episode badge colors: list items use translucent status colors, non-list titles use translucent neutral badges.
+
+
 v1.2.25
 
 - Added optional Title: Native title first setting.
@@ -98,7 +104,7 @@ v1.2.24
 
 ## Links
 
-[Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-25-by-david33/code)
+[Greasy Fork](https://greasyfork.org/en/scripts/574654-bettermdl-v1-2-26-by-david33/code)
 [MyDramaList Forum](https://mydramalist.com/discussions/general-discussion/88611-gathering-feedbacks?pid=3514580&page=15#p3514580)
 
 
