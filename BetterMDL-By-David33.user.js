@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BetterMDL v1.2.26 by David33
+// @name         BetterMDL v1.2.27 by David33
 // @namespace    https://mydramalist.com/
-// @version      1.2.26
+// @version      1.2.27
 // @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
 // @license      MIT
 // @match        https://mydramalist.com/*
@@ -3543,7 +3543,7 @@
     const rowId = collapseWhitespace((((row.getAttribute('class') || '').split(/\s+/).find((value) => value.startsWith('mdl-')) || '').slice(4)));
     const poster = getBetterFilmographyPosterUrl(q('img', row)?.getAttribute('src') || '');
     const yearText = headerIndexes.year >= 0 ? text(cells[headerIndexes.year]) : text(row);
-    const episodesText = headerIndexes.episodes >= 0 ? text(cells[headerIndexes.episodes]) : text(row);
+    const episodesText = headerIndexes.episodes >= 0 ? text(cells[headerIndexes.episodes]) : '';
     const ratingText = headerIndexes.rating >= 0 ? text(cells[headerIndexes.rating]) : '';
     const ratingHtml = headerIndexes.rating >= 0 ? (cells[headerIndexes.rating]?.innerHTML || '') : '';
     const roleText = headerIndexes.role >= 0 ? text(cells[headerIndexes.role]) : '';
