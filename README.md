@@ -68,6 +68,11 @@ BetterMDL-By-David33.user.js
 
 ### UPDATES:
 
+v1.2.28
+
+- Fixed the synopsis Hide section toggle appearing inside title review pages.
+- Prevented portal icons from appearing on write review pages.
+
 v1.2.27
 
 - Fixed Movie large filmography cards showing the year twice by hiding the episode badge when there is no real episode column.

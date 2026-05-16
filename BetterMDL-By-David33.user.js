@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BetterMDL v1.2.27 by David33
+// @name         BetterMDL v1.2.28 by David33
 // @namespace    https://mydramalist.com/
-// @version      1.2.27
+// @version      1.2.28
 // @description  A userscript to enhance MyDramaList, making it cleaner, friendlier & more modern.
 // @license      MIT
 // @match        https://mydramalist.com/*
@@ -4499,7 +4499,12 @@
     }
 
     const state = getCollapseState();
-    initTitleSynopsisToggle(state);
+    const main = getMainLeftColumn();
+    if (isTitleDetailsTabActive()) {
+      initTitleSynopsisToggle(state);
+    } else {
+      qa(`.${NS}-toggle-row[data-kind="title-synopsis"]`, main).forEach((node) => node.remove());
+    }
 
     const photosBox = findTitleBoxByHeading(/^photos$/i);
     if (photosBox) {
@@ -5057,6 +5062,7 @@
       if (/^episodes?$/.test(pathTab)) return 'episodes';
       if (/^cast$/.test(pathTab)) return 'cast';
       if (/^reviews?$/.test(pathTab)) return 'reviews';
+      if (/^write_review$/.test(pathTab)) return 'write-review';
       if (/^recommendations?$|^recs$/.test(pathTab)) return 'recs';
       if (/^photos?$/.test(pathTab)) return 'photos';
       if (/^discussions?$/.test(pathTab)) return 'discussions';
