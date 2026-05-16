@@ -66,43 +66,6 @@ BetterMDL-By-David33.user.js
 > Note: For full "Titles by Country" statistics to work, open your Completed, Currently Watching, On Hold, and Dropped lists, slowly scroll through each page until everything loads, then return to your profile and click Refresh. This allows BetterMDL to collect the full data and show accurate country stats.
 
 
-### UPDATES:
-
-v1.2.28
-
-- Fixed the synopsis Hide section toggle appearing inside title review pages.
-- Prevented portal icons from appearing on write review pages.
-
-v1.2.27
-
-- Fixed Movie large filmography cards showing the year twice by hiding the episode badge when there is no real episode column.
-
-
-v1.2.26
-
-- Fixed large filmography year/episode badge colors: list items use translucent status colors, non-list titles use translucent neutral badges.
-
-
-v1.2.25
-
-- Added optional Title: Native title first setting.
-- Added custom Watchlist Undecided label setting for V1/V2 Drama List views.
-- Replaced the V2 Undecided question mark with a note-style BetterMDL icon.
-
-v1.2.24
-
-- Added Comments Hide/Show support for both People and Title pages.
-- The Comments section can now be collapsed with the same Hide section/Show section behavior as other BetterMDL sections.
-- Added a new People Filmography toolbar.
-- Sort filmography by Title, Year, Episodes, or Rating.
-- Toggle ascending/descending order.
-- Hide completed/watched titles.
-- Switch between normal table view and a larger poster/card view.
-- Added new options to BetterMDL Settings: Hide/Show Comments for People/Title pages and Filmography toolbar. You can disable the toolbar or the Large View view.
-- Title page auto-hide now includes Comments.
-- People filmography controls can be enabled/disabled with Filmography: Sort by/Large View.
-
-
 ## Screenshots
 
 ![BetterMDL screenshot](Screenshots/screenshot-1.png)
